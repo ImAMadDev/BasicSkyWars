@@ -2,7 +2,7 @@
 
 namespace HyperDevs\utils;
 
-use pocketmine\level\Position;
+use pocketmine\world\Position;
 use pocketmine\math\Vector3;
 use pocketmine\Server;
 
@@ -15,7 +15,7 @@ class PositionUtils
      */
     public static function posToStr(Position $position) : string
     {
-        return implode(":", [$position->getFloorX(), $position->getFloorY(), $position->getFloorZ(), $position->getLevel()->getFolderName()]);
+        return implode(":", [$position->getFloorX(), $position->getFloorY(), $position->getFloorZ(), $position->getWorld()->getFolderName()]);
     }
 
     /**
@@ -47,7 +47,7 @@ class PositionUtils
     public static function strToPos(string $position) : Position
     {
         $pos = explode(":", $position);
-        $level = Server::getInstance()->getLevelByName($pos[3]);
+        $level = Server::getInstance()->getWorldManager()->getWorldByName($pos[3]);
         return new Position((int)$pos[0], (int)$pos[1], (int)$pos[2], $level);
     }
 
