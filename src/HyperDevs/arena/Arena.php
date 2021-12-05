@@ -17,18 +17,21 @@ use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityLevelChangeEvent;
+use pocketmine\event\entity\EntityTeleportEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\item\Item;
 use pocketmine\item\ItemIds;
-use pocketmine\level\Position;
+use pocketmine\world\Position;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\Player;
-use pocketmine\level\Level;
+use pocketmine\player\GameMode;
+use pocketmine\player\Player;
+use pocketmine\world\World;
 use pocketmine\Server;
-use pocketmine\tile\Chest;
+use pocketmine\block\tile\Chest;
+use pocketmine\item\ItemFactory;
 use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat;
 
@@ -150,9 +153,9 @@ class Arena extends MainExtension implements Listener
     /**
      * @return Level|null
      */
-    public function getWold(): ?Level
+    public function getWold(): ?World
     {
-        if (($level = Server::getInstance()->getLevelByName($this->getMap())) instanceof Level) {
+        if (($level = Server::getInstance()->getWorldManager()->getWorldByName($this->getMap())) instanceof World) {
             return $level;
         }
         return null;
@@ -164,7 +167,7 @@ class Arena extends MainExtension implements Listener
     public function getPlayers(): array
     {
         return array_filter($this->getWold()->getPlayers(), function ($player): bool {
-            return $player instanceof Player && $player->isOnline() && $player->getGamemode() === $player::SURVIVAL && $player->isAlive();
+            return $player instanceof Player && $player->isOnline() && $player->getGamemode() === GameMode::SURVIVAL() && $player->isAlive();
         });
     }
 
@@ -232,13 +235,13 @@ class Arena extends MainExtension implements Listener
     {
         for ($i = 1; $i < 12; $i++){
             if ($this->cache_slots[$i] == ""){
-                $this->cache_slots[$i] = $player->getLowerCaseName();
+                $this->cache_slots[$i] = $player->getName();
                 return $i;
             }
         }/*
         foreach($this->data['slots'] as $i => $slot) {
             if($slot === null){
-                $this->slots[$i] = $player->getLowerCaseName();
+                $this->slots[$i] = $player->getName();
                 return $i;
             }
         }*/
@@ -270,7 +273,7 @@ class Arena extends MainExtension implements Listener
     public function isPlaying($player) : bool
     {
         if($player instanceof Player) {
-            return $player->getLevel()->getFolderName() === $this->getMap();
+            return $player->getWorld()->getFolderName() === $this->getMap();
         }
         return array_search($player, $this->cache_slots) !== false;
     }
@@ -357,7 +360,7 @@ class Arena extends MainExtension implements Listener
         $player = $event->getPlayer();
         if($this->isPlaying($player)) {
             $this->getArenaSettings()->removePlayerVote($player);
-            $this->removePlayerFromSlot($player->getLowerCaseName());
+            $this->removePlayerFromSlot($player->getName());
         }
     }
 
@@ -368,8 +371,8 @@ class Arena extends MainExtension implements Listener
     {
         $player = $event->getPlayer();
         if($this->isPlaying($player)) {
-            $player->teleport($this->getServer()->getDefaultLevel()->getSpawnLocation());
-            $this->removePlayerFromSlot($player->getLowerCaseName());
+            $player->teleport($this->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
+            $this->removePlayerFromSlot($player->getName());
             $this->getArenaSettings()->removePlayerVote($player);
         }
     }
@@ -382,7 +385,7 @@ class Arena extends MainExtension implements Listener
         $player = $event->getPlayer();
         if ($this->isPlaying($player)){
             if($this->getStatus() === Arena::STATUS_WAITING or $this->getStatus() === Arena::STATUS_RESETTING){
-                $event->setCancelled(true);
+                $event->cancel();
             }
         }
     }
@@ -395,7 +398,7 @@ class Arena extends MainExtension implements Listener
         $player = $event->getPlayer();
         if ($this->isPlaying($player)){
             if($this->getStatus() === Arena::STATUS_WAITING or $this->getStatus() === Arena::STATUS_RESETTING){
-                $event->setCancelled(true);
+                $event->cancel();
             }
         }
     }
@@ -409,7 +412,7 @@ class Arena extends MainExtension implements Listener
         if ($this->isPlaying($player)){
             if ($this->getStatus() === Arena::STATUS_WAITING){
                 $item = $player->getInventory()->getItemInHand();
-                if($item->getNamedTag()->hasTag(Arena::ARENA_ITEM, StringTag::class)){
+                if($item->getNamedTag()->getTag(Arena::ARENA_ITEM) instanceof StringTag){
                     switch ($item->getNamedTag()->getString(Arena::ARENA_ITEM, "empty")){
                         case "start_item":
                             $this->forceStart();
@@ -434,14 +437,14 @@ class Arena extends MainExtension implements Listener
     /**
      * @param EntityLevelChangeEvent $event
      */
-    public function onChangeLevel(EntityLevelChangeEvent $event) : void
+    public function onChangeLevel(EntityTeleportEvent $event) : void
     {
         $player = $event->getEntity();
-        $level = $event->getOrigin();
+        $level = $event->getFrom()->getWorld();
         if(!$player instanceof Player) return;
-        if(($arena = $this->getMain()->getArenaByLevel($level)) instanceof Arena) {
+        if(($arena = $this->getMain()->getArenaByWorld($level)) instanceof Arena) {
             $arena->getArenaSettings()->removePlayerVote($player);
-            $arena->removePlayerFromSlot($player->getLowerCaseName());
+            $arena->removePlayerFromSlot($player->getName());
         }
     }
 
@@ -452,10 +455,10 @@ class Arena extends MainExtension implements Listener
     {
         $player = $event->getEntity();
         if ($player instanceof Player && $this->isPlaying($player) && $this->getStatus() !== Arena::STATUS_RUNNING) {
-            $event->setCancelled(true);
+            $event->cancel();
             if ($event->getCause() === EntityDamageEvent::CAUSE_VOID){
-                if (isset($this->data["slots"][array_search($player->getLowerCaseName(), $this->cache_slots)])) {
-                    $player->teleport(PositionUtils::strToPos($this->data["slots"][array_search($player->getLowerCaseName(), $this->cache_slots)]));
+                if (isset($this->data["slots"][array_search($player->getName(), $this->cache_slots)])) {
+                    $player->teleport(PositionUtils::strToPos($this->data["slots"][array_search($player->getName(), $this->cache_slots)]));
                 }
             }
         }
@@ -472,9 +475,9 @@ class Arena extends MainExtension implements Listener
         if ($event instanceof EntityDamageByEntityEvent){
             $damager = $event->getDamager();
             if(($player->getHealth() - $event->getFinalDamage()) <= 0){
-                $event->setCancelled(true);
-                $player->setGamemode($player::SPECTATOR);
-                $this->removePlayerFromSlot($player->getLowerCaseName());
+                $event->cancel();
+                $player->setGamemode(GameMode::SPECTATOR());
+                $this->removePlayerFromSlot($player->getName());
                 if ($damager instanceof Player){
                     $this->sendAnnouncement(TextFormat::RED . $player->getName() . TextFormat::GRAY . " was killed by " . TextFormat::RED . $damager->getName());
                 }
@@ -484,13 +487,15 @@ class Arena extends MainExtension implements Listener
 
     public function refillChest() : void
     {
-        foreach ($this->getWold()->getTiles() as $tile){
-            if($tile instanceof Chest){
-                $tile->getInventory()->clearAll();
-                $chest = new ChestContent();
-                $items = $chest->getItems(rand(8, 15), $this->getArenaSettings()->getMostVoted());
-                foreach ($items as $item){
-                    $tile->getInventory()->setItem(rand(0, 25), $item);
+        foreach ($this->getWold()->getLoadedChunks() as $chunk){
+            foreach ($chunk->getTiles() as $tile){
+                if($tile instanceof Chest){
+                    $tile->getInventory()->clearAll();
+                    $chest = new ChestContent();
+                    $items = $chest->getItems(rand(8, 15), $this->getArenaSettings()->getMostVoted());
+                    foreach ($items as $item){
+                        $tile->getInventory()->setItem(rand(0, 25), $item);
+                    }  
                 }
             }
         }
@@ -506,8 +511,8 @@ class Arena extends MainExtension implements Listener
                 $player->getArmorInventory()->clearAll();
                 $player->getCursorInventory()->clearAll();
             }
-            if (isset($this->data["slots"][array_search($player->getLowerCaseName(), $this->cache_slots)])) {
-                $player->teleport(PositionUtils::strToPos($this->data["slots"][array_search($player->getLowerCaseName(), $this->cache_slots)]));
+            if (isset($this->data["slots"][array_search($player->getName(), $this->cache_slots)])) {
+                $player->teleport(PositionUtils::strToPos($this->data["slots"][array_search($player->getName(), $this->cache_slots)]));
                 if ($this->hasPedestals()) BlockUtils::trapPlayerInBox($player);
             }
             $player->setHealth($player->getMaxHealth());
@@ -537,7 +542,7 @@ class Arena extends MainExtension implements Listener
         $this->setStatus(self::STATUS_DISABLED);
         $this->config->set("status", self::STATUS_DISABLED);
         foreach($this->getWold()->getPlayers() as $player) {
-            $player->teleport($this->getServer()->getDefaultLevel()->getSpawnLocation());
+            $player->teleport($this->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
         }
         $this->reset(false);
     }
@@ -547,19 +552,19 @@ class Arena extends MainExtension implements Listener
      */
     public function getArenaConfigurationItems() : array
     {
-        $start = Item::get(ItemIds::NETHER_STAR);
+        $start = ItemFactory::getInstance()->get(ItemIds::NETHER_STAR);
         $start->getNamedTag()->setString(self::ARENA_ITEM, "start_item", true);
         $start->setCustomName(TextFormat::colorize("&eForce Start"));
 
-        $op_vote = Item::get(ItemIds::ENDER_CHEST);
+        $op_vote = ItemFactory::getInstance()->get(ItemIds::ENDER_CHEST);
         $op_vote->getNamedTag()->setString(self::ARENA_ITEM, "op_vote_item", true);
         $op_vote->setCustomName(TextFormat::colorize("&6Over Powered Chests"));
 
-        $normal_vote = Item::get(ItemIds::CHEST);
+        $normal_vote = ItemFactory::getInstance()->get(ItemIds::CHEST);
         $normal_vote->getNamedTag()->setString(self::ARENA_ITEM, "normal_vote_item", true);
         $normal_vote->setCustomName(TextFormat::colorize("&aNormal Chests"));
 
-        $kits = Item::get(ItemIds::FIREBALL);
+        $kits = ItemFactory::getInstance()->get(ItemIds::FIREBALL);
         $kits->getNamedTag()->setString(self::ARENA_ITEM, "kits_item", true);
         $kits->setCustomName(TextFormat::colorize("&eKits"));
         return [$start, $op_vote, $normal_vote, $kits];

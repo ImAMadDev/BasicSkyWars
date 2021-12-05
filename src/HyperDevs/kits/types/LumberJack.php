@@ -4,11 +4,14 @@ namespace HyperDevs\kits\types;
 
 use HyperDevs\kits\Kit;
 use pocketmine\block\BlockIds;
+use pocketmine\block\BlockLegacyIds;
+use pocketmine\data\bedrock\EnchantmentIdMap;
+use pocketmine\data\bedrock\EnchantmentIds;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\enchantment\EnchantmentInstance;
-use pocketmine\item\Item;
+use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIds;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
 
 class LumberJack extends Kit
@@ -41,10 +44,10 @@ class LumberJack extends Kit
      */
     public function getItems() : array
     {
-        $axe = Item::get(ItemIds::IRON_AXE);
-        $axe->addEnchantment(new EnchantmentInstance(Enchantment::getEnchantment(Enchantment::EFFICIENCY), 4));
-        $axe->addEnchantment(new EnchantmentInstance(Enchantment::getEnchantment(Enchantment::SHARPNESS), 1));
-        $block = Item::get(BlockIds::WOOD, 0, 16);
+        $axe = ItemFactory::getInstance()->get(ItemIds::IRON_AXE);
+        $axe->addEnchantment(new EnchantmentInstance(EnchantmentIdMap::getInstance()->fromId(EnchantmentIds::EFFICIENCY), 4));
+        $axe->addEnchantment(new EnchantmentInstance(EnchantmentIdMap::getInstance()->fromId(EnchantmentIds::SHARPNESS), 1));
+        $block = ItemFactory::getInstance()->get(BlockLegacyIds::WOOD, 0, 16);
         return [$axe, $block];
     }
 
@@ -54,10 +57,10 @@ class LumberJack extends Kit
     public function getArmor() : array
     {
         return [
-            Item::get(BlockIds::AIR),
-            Item::get(ItemIds::IRON_CHESTPLATE),
-            Item::get(BlockIds::AIR),
-            Item::get(ItemIds::IRON_BOOTS)
+            ItemFactory::air(),
+            ItemFactory::getInstance()->get(ItemIds::IRON_CHESTPLATE),
+            ItemFactory::air(),
+            ItemFactory::getInstance()->get(ItemIds::IRON_BOOTS)
         ];
     }
 

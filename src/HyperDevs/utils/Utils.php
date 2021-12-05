@@ -6,7 +6,7 @@ use formapi\SimpleForm;
 use HyperDevs\arena\Arena;
 use HyperDevs\kits\Kit;
 use HyperDevs\Main;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 class Utils
 {

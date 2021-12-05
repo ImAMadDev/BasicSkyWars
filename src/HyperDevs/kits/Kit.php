@@ -2,7 +2,7 @@
 
 namespace HyperDevs\kits;
 
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 abstract class Kit
 {

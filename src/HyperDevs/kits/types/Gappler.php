@@ -3,12 +3,10 @@
 namespace HyperDevs\kits\types;
 
 use HyperDevs\kits\Kit;
-use pocketmine\block\BlockIds;
-use pocketmine\item\enchantment\Enchantment;
-use pocketmine\item\enchantment\EnchantmentInstance;
-use pocketmine\item\Item;
-use pocketmine\item\ItemIds;
-use pocketmine\Player;
+use pocketmine\item\{
+    ItemFactory,
+    ItemIds};
+use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
 
 class Gappler extends Kit
@@ -41,7 +39,7 @@ class Gappler extends Kit
      */
     public function getItems() : array
     {
-        return [Item::get(ItemIds::GOLDEN_APPLE, 0, 10)];
+        return [ItemFactory::getInstance()->get(ItemIds::GOLDEN_APPLE, 0, 10)];
     }
 
     /**
@@ -50,10 +48,10 @@ class Gappler extends Kit
     public function getArmor() : array
     {
         return [
-            Item::get(BlockIds::AIR),
-            Item::get(ItemIds::AIR),
-            Item::get(BlockIds::AIR),
-            Item::get(ItemIds::AIR)
+            ItemFactory::air(),
+            ItemFactory::air(),
+            ItemFactory::air(),
+            ItemFactory::air()
         ];
     }
 

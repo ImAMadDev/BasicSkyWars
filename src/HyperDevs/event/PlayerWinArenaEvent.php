@@ -3,7 +3,7 @@
 namespace HyperDevs\event;
 
 use HyperDevs\arena\Arena;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 class PlayerWinArenaEvent extends ArenaEvent
 {

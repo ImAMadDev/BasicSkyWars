@@ -14,11 +14,11 @@ use HyperDevs\utils\MessagesUtils;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerJoinEvent;
-use pocketmine\level\Level;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\utils\Config;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
+use pocketmine\world\World;
 
 class Main extends PluginBase implements Listener
 {
@@ -43,19 +43,19 @@ class Main extends PluginBase implements Listener
      */
     public static array $kits = [];
 
-    public function onLoad()
+    public function onLoad() : void
     {
        self::$instance = $this;
     }
 
-    public function onEnable()
+    public function onEnable() : void
     {
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
         $this->initKits();
         $this->initArenas();
     }
 
-    public function onDisable()
+    public function onDisable() : void
     {
     }
 
@@ -141,12 +141,12 @@ class Main extends PluginBase implements Listener
     }
 
     /**
-     * @param Level $level
+     * @param World $world
      * @return Arena|null
      */
-    public function getArenaByLevel(Level $level) : ?Arena
+    public function getArenaByWorld(World $world) : ?Arena
     {
-        foreach (self::$arenas as $arena) if ($arena->getMap() === $level->getFolderName()){
+        foreach (self::$arenas as $arena) if ($arena->getMap() === $world->getFolderName()){
             return $arena;
         }
         return null;
@@ -158,7 +158,7 @@ class Main extends PluginBase implements Listener
      */
     public function getSession(Player $player) : ? CreatorSession
     {
-        return self::$sessions[$player->getLowerCaseName()] ?? null;
+        return self::$sessions[$player->getName()] ?? null;
     }
 
     /**
@@ -203,11 +203,11 @@ class Main extends PluginBase implements Listener
      */
     public function openSession(Player $player): void
     {
-        if ( isset(self::$sessions[$player->getLowerCaseName()])){
+        if ( isset(self::$sessions[$player->getName()])){
             $player->sendMessage((MessagesUtils::PREFIX . MessagesUtils::getMessage("session_opened")));
             return;
         }
-        self::$sessions[$player->getLowerCaseName()] = new CreatorSession($this, $player);
+        self::$sessions[$player->getName()] = new CreatorSession($this, $player);
         $player->sendMessage(MessagesUtils::PREFIX . MessagesUtils::getMessage("session_open"));
     }
 
@@ -295,16 +295,16 @@ class Main extends PluginBase implements Listener
                 case "map":
                     if (($session = $this->getSession($player)) instanceof  CreatorSession){
                         if(!isset($args[2])){
-                            $map = $player->getLevel();
+                            $map = $player->getWorld();
                         } else {
-                            if(!$this->getServer()->isLevelGenerated($args[2])){
+                            if(!$this->getServer()->getWorldManager()->isWorldGenerated($args[2])){
                                 $player->sendMessage(MessagesUtils::PREFIX . MessagesUtils::getMessage("level_dont_exist", ["level" => $args[2]]));
                                 return;
                             }
-                            if (!$this->getServer()->isLevelLoaded($args[2])){
-                                $this->getServer()->loadLevel($args[2]);
+                            if (!$this->getServer()->getWorldManager()->isWorldLoaded($args[2])){
+                                $this->getServer()->getWorldManager()->loadWorld($args[2]);
                             }
-                            $map = $this->getServer()->getLevelByName($args[2]);
+                            $map = $this->getServer()->getWorldManager()->getWorldByName($args[2]);
                         }
                         $session->setMap($map);
                     }
@@ -328,7 +328,7 @@ class Main extends PluginBase implements Listener
                     break;
                 case "cancel":
                     if ($this->getSession($player) instanceof  CreatorSession){
-                        unset(self::$sessions[$player->getLowerCaseName()]);
+                        unset(self::$sessions[$player->getName()]);
                         $player->sendMessage(MessagesUtils::PREFIX . MessagesUtils::getMessage("session.cancelled"));
                     }
                     break;

@@ -2,7 +2,7 @@
 
 namespace HyperDevs\arena;
 
-use pocketmine\level\Position;
+use pocketmine\world\Position;
 
 class SpawnCache
 {

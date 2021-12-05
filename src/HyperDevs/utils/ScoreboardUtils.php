@@ -3,7 +3,7 @@
 namespace HyperDevs\utils;
 
 use HyperDevs\Main;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 use pocketmine\network\mcpe\protocol\{RemoveObjectivePacket, SetDisplayObjectivePacket, SetScorePacket};
 use pocketmine\network\mcpe\protocol\types\ScorePacketEntry;
@@ -31,7 +31,7 @@ class ScoreboardUtils {
         $pk->displayName = $displayName;
         $pk->criteriaName = "dummy";
         $pk->sortOrder = 0;
-        $player->sendDataPacket($pk);
+        $player->getNetworkSession()->sendDataPacket($pk);
         self::$scoreboards[$player->getName()] = $objectiveName;
     }
 
@@ -43,7 +43,7 @@ class ScoreboardUtils {
             $objectiveName = $this->getObjectiveName($player);
             $pk = new RemoveObjectivePacket();
             $pk->objectiveName = $objectiveName;
-            $player->sendDataPacket($pk);
+            $player->getNetworkSession()->sendDataPacket($pk);
             unset(self::$scoreboards[$player->getName()]);
         }
     }
@@ -57,7 +57,7 @@ class ScoreboardUtils {
             $objectiveName = $this->getObjectiveName($player);
             $pk = new RemoveObjectivePacket();
             $pk->objectiveName = $objectiveName;
-            $player->sendDataPacket($pk);
+            $player->getNetworkSession()->sendDataPacket($pk);
             unset(self::$scoreboards[$player->getName()], $key);
         }
     }
@@ -86,7 +86,7 @@ class ScoreboardUtils {
         $pk = new SetScorePacket();
         $pk->type = $pk::TYPE_CHANGE;
         $pk->entries[] = $entry;
-        $player->sendDataPacket($pk);
+        $player->getNetworkSession()->sendDataPacket($pk);
     }
 
     /**

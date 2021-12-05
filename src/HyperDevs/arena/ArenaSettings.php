@@ -4,7 +4,7 @@ namespace HyperDevs\arena;
 
 use HyperDevs\utils\ChestContent;
 use HyperDevs\utils\MessagesUtils;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 final class ArenaSettings
 {
@@ -82,7 +82,7 @@ final class ArenaSettings
             return;
         }
         $this->op_votes += 1;
-        $this->vote_cache[$player->getLowerCaseName()] = ArenaSettings::TYPE_OP;
+        $this->vote_cache[$player->getName()] = ArenaSettings::TYPE_OP;
         $player->sendMessage(MessagesUtils::PREFIX . MessagesUtils::getMessage("vote_confirm_for", ["vote" => "OverPower"]));
     }
 
@@ -96,7 +96,7 @@ final class ArenaSettings
             return;
         }
         $this->normal_votes += 1;
-        $this->vote_cache[$player->getLowerCaseName()] = ArenaSettings::TYPE_NORMAL;
+        $this->vote_cache[$player->getName()] = ArenaSettings::TYPE_NORMAL;
         $player->sendMessage(MessagesUtils::PREFIX . MessagesUtils::getMessage("vote_confirm_for", ["vote" => "Normal"]));
     }
 
@@ -107,7 +107,7 @@ final class ArenaSettings
     public function getPlayerVote(Player $player) : int
 
     {
-        return $this->vote_cache[$player->getLowerCaseName()] ?? -1;
+        return $this->vote_cache[$player->getName()] ?? -1;
     }
 
     public function removePlayerVote(Player $player) : void
@@ -115,10 +115,10 @@ final class ArenaSettings
         if($this->getPlayerVote($player) === -1) return;
         if($this->getPlayerVote($player) == 0){
             $this->normal_votes--;
-            unset($this->vote_cache[$player->getLowerCaseName()]);
+            unset($this->vote_cache[$player->getName()]);
         } else {
             $this->op_votes--;
-            unset($this->vote_cache[$player->getLowerCaseName()]);
+            unset($this->vote_cache[$player->getName()]);
         }
     }
 
@@ -128,7 +128,7 @@ final class ArenaSettings
      */
     public function hasPlayerVote(Player $player) : bool
     {
-        return isset($this->vote_cache[$player->getLowerCaseName()]);
+        return isset($this->vote_cache[$player->getName()]);
     }
 
     public function reset() : void

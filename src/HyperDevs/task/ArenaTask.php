@@ -5,6 +5,7 @@ namespace HyperDevs\task;
 use HyperDevs\arena\Arena;
 use HyperDevs\event\PlayerWinArenaEvent;
 use HyperDevs\utils\MessagesUtils;
+use pocketmine\player\GameMode;
 use pocketmine\scheduler\Task;
 
 class ArenaTask extends Task
@@ -34,9 +35,9 @@ class ArenaTask extends Task
     /**
      * @inheritDoc
      */
-    public function onRun(int $currentTick)
+    public function onRun() : void
     {
-        if(!$this->getArena() instanceof Arena) $this->getArena()->getScheduler()->cancelTask($this->getTaskId());
+        if(!$this->getArena() instanceof Arena) $this->onCancel();
         switch ($this->getArena()->getStatus()){
             case Arena::STATUS_WAITING:
                 if(count($this->getArena()->getPlayers()) === 2){
@@ -80,8 +81,8 @@ class ArenaTask extends Task
                             $player->getInventory()->clearAll();
                             $player->getArmorInventory()->clearAll();
                             $player->getCursorInventory()->clearAll();
-                            $player->setGamemode($player::SURVIVAL);
-                            $player->teleport($this->getArena()->getServer()->getDefaultLevel()->getSpawnLocation());
+                            $player->setGamemode(GameMode::SURVIVAL());
+                            $player->teleport($this->getArena()->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
                         }
                     }
                 }

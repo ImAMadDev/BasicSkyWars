@@ -4,11 +4,14 @@ namespace HyperDevs\kits\types;
 
 use HyperDevs\kits\Kit;
 use pocketmine\block\BlockIds;
-use pocketmine\item\enchantment\Enchantment;
+use pocketmine\block\BlockLegacyIds;
+use pocketmine\data\bedrock\EnchantmentIdMap;
+use pocketmine\data\bedrock\EnchantmentIds;
 use pocketmine\item\enchantment\EnchantmentInstance;
-use pocketmine\item\Item;
-use pocketmine\item\ItemIds;
-use pocketmine\Player;
+use pocketmine\item\{
+    ItemFactory,
+    ItemIds};
+use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
 
 class Tank extends Kit
@@ -41,9 +44,9 @@ class Tank extends Kit
      */
     public function getItems() : array
     {
-        $sword = Item::get(ItemIds::IRON_SWORD);
-        $sword->addEnchantment(new EnchantmentInstance(Enchantment::getEnchantment(Enchantment::SHARPNESS), 1));
-        $block = Item::get(BlockIds::WOOD, 0, 16);
+        $sword = ItemFactory::getInstance()->get(ItemIds::IRON_SWORD);
+        $sword->addEnchantment(new EnchantmentInstance(EnchantmentIdMap::getInstance()->fromId(EnchantmentIds::SHARPNESS), 1));
+        $block = ItemFactory::getInstance()->get(BlockLegacyIds::WOOD, 0, 16);
         return [$sword, $block];
     }
 
@@ -53,10 +56,10 @@ class Tank extends Kit
     public function getArmor() : array
     {
         return [
-            Item::get(ItemIds::IRON_HELMET),
-            Item::get(ItemIds::IRON_CHESTPLATE),
-            Item::get(ItemIds::IRON_LEGGINGS),
-            Item::get(ItemIds::IRON_BOOTS)
+            ItemFactory::getInstance()->get(ItemIds::IRON_HELMET),
+            ItemFactory::getInstance()->get(ItemIds::IRON_CHESTPLATE),
+            ItemFactory::getInstance()->get(ItemIds::IRON_LEGGINGS),
+            ItemFactory::getInstance()->get(ItemIds::IRON_BOOTS)
         ];
     }
 

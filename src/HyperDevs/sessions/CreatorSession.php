@@ -7,8 +7,8 @@ use HyperDevs\Main;
 use HyperDevs\utils\MainExtension;
 use HyperDevs\utils\MessagesUtils;
 use HyperDevs\utils\PositionUtils;
-use pocketmine\level\Level;
-use pocketmine\Player;
+use pocketmine\world\World;
+use pocketmine\player\Player;
 
 class CreatorSession extends MainExtension
 {
@@ -65,7 +65,7 @@ class CreatorSession extends MainExtension
     /**
      * @param Level $world
      */
-    public function setMap(Level $world) : void
+    public function setMap(World $world) : void
     {
         $this->data["mapName"] = $world->getFolderName();
         $this->getPlayer()->sendMessage(MessagesUtils::PREFIX . MessagesUtils::getMessage("map_name", ["name" => $world->getFolderName()]));

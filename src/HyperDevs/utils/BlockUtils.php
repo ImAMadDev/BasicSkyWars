@@ -2,8 +2,10 @@
 
 namespace HyperDevs\utils;
 
-use pocketmine\block\BlockIds;
-use pocketmine\Player;
+use pocketmine\block\{
+    BlockFactory,
+    BlockLegacyIds};
+use pocketmine\player\Player;
 
 //Thanks to muqsit
 // https://github.com/Muqsit/SkyWars/blob/0f3de9ef080a8d3e2a8bf6f95a159dbb93f34915/src/muqsit/skywars/utils/BlockUtils.php#L9
@@ -15,10 +17,10 @@ class BlockUtils
      * @param int $blockId
      * @param int $blockMeta
      */
-    public static function trapPlayerInBox(Player $player, int $blockId = BlockIds::AIR, int $blockMeta = 0) : void
+    public static function trapPlayerInBox(Player $player, int $blockId = BlockLegacyIds::AIR, int $blockMeta = 0) : void
     {
-        $level = $player->getLevel();
-        $pos = $player->floor();
+        $level = $player->getWorld();
+        $pos = $player->getPosition()->floor();
         $player->teleport($pos->add(0.5, 0, 0.5));
 
         $x = $pos->x;
@@ -32,14 +34,11 @@ class BlockUtils
                 }
 
                 for ($j = 0; $j <= 1; ++$j) {
-                    $level->setBlockIdAt($x + $i, $y + $j, $z + $k, $blockId);
-                    $level->setBlockDataAt($x + $i, $y + $j, $z + $k, $blockMeta);
+                    $level->setBlockAt($x + $i, $y + $j, $z + $k, BlockFactory::getInstance()->get($blockId, $blockMeta));
                 }
             }
         }
 
-        $level->setBlockIdAt($x, $y + 2, $z, $blockId);
-        $level->setBlockDataAt($x, $y + 2, $z, $blockMeta);
-    }
+        $level->setBlockAt($x, $y + 2, $z, BlockFactory::getInstance()->get($blockId, $blockMeta));    }
 
 }

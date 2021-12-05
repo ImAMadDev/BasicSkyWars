@@ -2,12 +2,12 @@
 
 namespace HyperDevs\utils;
 
-use pocketmine\item\enchantment\Enchantment;
+use pocketmine\data\bedrock\EnchantmentIdMap;
+use pocketmine\data\bedrock\EnchantmentIds;
+use pocketmine\data\bedrock\PotionTypeIds;
 use pocketmine\item\enchantment\EnchantmentInstance;
-use pocketmine\item\Item;
+use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIds;
-use pocketmine\item\Potion;
-
 final class ChestContent
 {
 
@@ -34,9 +34,9 @@ final class ChestContent
         [ItemIds::WOOD, 0, "random" => [16, 27]],
         [ItemIds::STONE, 0, 20],
         [ItemIds::EGG, 0, 16],
-        [ItemIds::SPLASH_POTION, Potion::STRONG_REGENERATION],
-        [ItemIds::SPLASH_POTION, Potion::STRONG_SWIFTNESS],
-        [ItemIds::IRON_SWORD, 0, 1, "enchantments" => [["id" => Enchantment::SHARPNESS, "level" => 1]]],
+        [ItemIds::SPLASH_POTION, PotionTypeIds::STRONG_REGENERATION],
+        [ItemIds::SPLASH_POTION, PotionTypeIds::STRONG_SWIFTNESS],
+        [ItemIds::IRON_SWORD, 0, 1, "enchantments" => [["id" => EnchantmentIds::SHARPNESS, "level" => 1]]],
     ];
 
     public static array $items_op = [
@@ -55,10 +55,10 @@ final class ChestContent
         [ItemIds::WOOD, 0, 16],
         [ItemIds::STONE, 0, 20],
         [ItemIds::EGG, 0, 16],
-        [ItemIds::SPLASH_POTION, Potion::STRONG_REGENERATION],
-        [ItemIds::SPLASH_POTION, Potion::STRONG_SWIFTNESS],
-        [ItemIds::IRON_SWORD, 0, 1, "enchantments" => [["id" => Enchantment::SHARPNESS, "level" => 3]]],
-        [ItemIds::DIAMOND_SWORD, 0, 1, "enchantments" => [["id" => Enchantment::SHARPNESS, "level" => 3]]],
+        [ItemIds::SPLASH_POTION, PotionTypeIds::STRONG_REGENERATION],
+        [ItemIds::SPLASH_POTION, PotionTypeIds::STRONG_SWIFTNESS],
+        [ItemIds::IRON_SWORD, 0, 1, "enchantments" => [["id" => EnchantmentIds::SHARPNESS, "level" => 3]]],
+        [ItemIds::DIAMOND_SWORD, 0, 1, "enchantments" => [["id" => EnchantmentIds::SHARPNESS, "level" => 3]]],
     ];
 
     /**
@@ -73,10 +73,10 @@ final class ChestContent
         shuffle($contents);
         foreach($contents as $i){
             $count = $i[2] == "random" ? rand($i[2][0], $i[2][1]) : $i[2];
-            $item = Item::get($i[0], ($i[1] ?? 0), ($count ?? 1));
+            $item = ItemFactory::getInstance()->get($i[0], ($i[1] ?? 0), ($count ?? 1));
             if (isset($i["enchantments"])) foreach ($i["enchantments"] as $ench){
                 if($ench["level"] == "random") $ench["level"] = rand(1, 2);
-                $item->addEnchantment(new EnchantmentInstance(Enchantment::getEnchantment($ench["id"]), $ench["level"]));
+                $item->addEnchantment(new EnchantmentInstance(EnchantmentIdMap::getInstance()->fromId($ench["id"]), $ench["level"]));
             }
             if(count($items) < $items_count) $items[] = $item;
         }

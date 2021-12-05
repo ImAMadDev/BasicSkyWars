@@ -57,11 +57,11 @@ class BackupUtils extends MainExtension
     }
     public function loadMap(bool $justSave = false): ?Level {
         $folderName = $this->arena->getMap();
-        if(!$this->getServer()->isLevelGenerated($folderName)) {
+        if(!$this->getServer()->getWorldManager()->isLevelGenerated($folderName)) {
             return null;
         }
 
-        if($this->getServer()->isLevelLoaded($folderName)) $this->getServer()->getLevelByName($folderName)->unload(true);
+        if($this->getServer()->getWorldManager()->isLevelLoaded($folderName)) $this->getServer()->getWorldManager()->getWorldByName($folderName)->unload(true);
 
         $zipPath = $this->getDataFolder() . "backups" . DIRECTORY_SEPARATOR . $this->arena->getMap() . ".zip";
 
@@ -79,7 +79,7 @@ class BackupUtils extends MainExtension
             return null;
         }
 
-        $this->getServer()->loadLevel($folderName);
-        return $this->getServer()->getLevelByName($folderName);
+        $this->getServer()->getWorldManager()->loadLevel($folderName);
+        return $this->getServer()->getWorldManager()->getWorldByName($folderName);
     }
 }
