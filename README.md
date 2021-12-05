@@ -1,7 +1,4 @@
-#BasicSkyWars Plugins</br>
-UNFINISHED</br>
-a basic skywars plugin for pocketmine
-
+<a href="https://poggit.pmmp.io/p/BasicSkyWars"><img src="https://poggit.pmmp.io/shield.state/BasicSkyWars"></a>
 # Information <br>
 - A basic and Unfinished SkyWars Plugin for pocketmine API 4.0 <br>
 # Features<br>
