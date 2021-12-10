@@ -3,11 +3,9 @@
 namespace HyperDevs\kits\types;
 
 use HyperDevs\kits\Kit;
-use pocketmine\block\BlockIds;
 use pocketmine\block\BlockLegacyIds;
 use pocketmine\data\bedrock\EnchantmentIdMap;
 use pocketmine\data\bedrock\EnchantmentIds;
-use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIds;

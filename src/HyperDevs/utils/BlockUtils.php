@@ -39,6 +39,7 @@ class BlockUtils
             }
         }
 
-        $level->setBlockAt($x, $y + 2, $z, BlockFactory::getInstance()->get($blockId, $blockMeta));    }
+        $level->setBlockAt($x, $y + 2, $z, BlockFactory::getInstance()->get($blockId, $blockMeta));
+    }
 
 }

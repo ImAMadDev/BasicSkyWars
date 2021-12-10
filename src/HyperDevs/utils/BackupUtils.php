@@ -4,7 +4,7 @@ namespace HyperDevs\utils;
 
 use HyperDevs\arena\Arena;
 use HyperDevs\Main;
-use pocketmine\level\Level;
+use pocketmine\world\World;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -32,7 +32,7 @@ class BackupUtils extends MainExtension
     public function saveMap() : void
     {
         $this->arena->getWold()->save(true);
-        $levelPath = $this->getServer()->getDataPath() . "worlds" . DIRECTORY_SEPARATOR . $this->arena->getMap();
+        $worldPath = $this->getServer()->getDataPath() . "worlds" . DIRECTORY_SEPARATOR . $this->arena->getMap();
         $zipPath = $this->getDataFolder() . "backups" . DIRECTORY_SEPARATOR . $this->arena->getMap() . ".zip";
 
         $zip = new ZipArchive();
@@ -42,7 +42,7 @@ class BackupUtils extends MainExtension
         }
 
         $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
-        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(realpath($levelPath)), RecursiveIteratorIterator::LEAVES_ONLY);
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(realpath($worldPath)), RecursiveIteratorIterator::LEAVES_ONLY);
 
         /** @var SplFileInfo $file */
         foreach ($files as $file) {
@@ -55,13 +55,13 @@ class BackupUtils extends MainExtension
 
         $zip->close();
     }
-    public function loadMap(bool $justSave = false): ?Level {
+    public function loadMap(bool $justSave = false): ?World {
         $folderName = $this->arena->getMap();
-        if(!$this->getServer()->getWorldManager()->isLevelGenerated($folderName)) {
+        if(!$this->getServer()->getWorldManager()->isWorldGenerated($folderName)) {
             return null;
         }
 
-        if($this->getServer()->getWorldManager()->isLevelLoaded($folderName)) $this->getServer()->getWorldManager()->getWorldByName($folderName)->unload(true);
+        if($this->getServer()->getWorldManager()->isWorldLoaded($folderName)) $this->getServer()->getWorldManager()->unloadWorld($this->getServer()->getWorldManager()->getWorldByName($folderName), true);
 
         $zipPath = $this->getDataFolder() . "backups" . DIRECTORY_SEPARATOR . $this->arena->getMap() . ".zip";
 
@@ -79,7 +79,7 @@ class BackupUtils extends MainExtension
             return null;
         }
 
-        $this->getServer()->getWorldManager()->loadLevel($folderName);
+        $this->getServer()->getWorldManager()->loadWorld($folderName);
         return $this->getServer()->getWorldManager()->getWorldByName($folderName);
     }
 }

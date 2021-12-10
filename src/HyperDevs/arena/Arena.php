@@ -22,7 +22,6 @@ use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
-use pocketmine\item\Item;
 use pocketmine\item\ItemIds;
 use pocketmine\world\Position;
 use pocketmine\nbt\tag\StringTag;
