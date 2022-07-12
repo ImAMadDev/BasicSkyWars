@@ -1,0 +1,8 @@
+.gitignore
+.idea
+vendor/
+composer.json
+composer.lock
+.idea/BasicSkyWars.iml
+.idea/discord.xml
+*.xml

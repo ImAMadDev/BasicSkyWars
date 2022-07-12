@@ -1,0 +1,24 @@
+version: 1.0.2
+
+lobby:
+  world: world
+  spawn: 0,64,0,0.0,0.0
+
+game:
+  fireworks: true
+  crystal_cages: true
+  remove_cages: true
+  level_system:
+    enabled: true
+    xp_per_win: 1.50
+    xp_per_kill: 0.25
+  economy_plugin: EconomyAPI
+  win_commands:
+    - say {player_name} has won a game!
+
+database:
+  hostname: localhost
+  port: 3306
+  username: username
+  password: password
+  database: database

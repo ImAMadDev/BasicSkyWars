@@ -1,0 +1,8 @@
+items-per-chest:
+  min: 5
+  max: 10
+
+categories:
+  basic: []
+  op: []
+  ultra: []
